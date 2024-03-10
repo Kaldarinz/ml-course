@@ -9,7 +9,7 @@ class KNearestNeighbor:
     def __init__(self):
         pass
 
-    def fit(self, X, y):
+    def fit(self, X: np.ndarray, y: np.ndarray):
         """
         Train the classifier. For k-nearest neighbors this is just
         memorizing the training data.
@@ -49,7 +49,7 @@ class KNearestNeighbor:
 
         return self.predict_labels(dists, k=k)
 
-    def compute_distances_two_loops(self, X):
+    def compute_distances_two_loops(self, X: np.ndarray):
         """
         Compute the distance between each test point in X and each training point
         in self.X_train using a nested loop over both the training data and the
@@ -68,6 +68,7 @@ class KNearestNeighbor:
         dists = np.zeros((num_test, num_train))
         for i in range(num_test):
             for j in range(num_train):
+                pass
                 #####################################################################
                 # TODO:                                                             #
                 # Compute the l2 distance between the ith test point and the jth    #
@@ -75,7 +76,11 @@ class KNearestNeighbor:
                 # not use a loop over dimension, nor use np.linalg.norm().          #
                 #####################################################################
                 # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
+                dists[i,j] = np.sqrt(
+                    (
+                        (self.X_train[j,:]-X[i,:])**2
+                    ).sum()
+                )
                 # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         return dists
 
@@ -97,7 +102,9 @@ class KNearestNeighbor:
             # Do not use np.linalg.norm().                                        #
             #######################################################################
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
+            dists[i,:] = np.sqrt(
+                np.sum((self.X_train - X[i,:])**2, axis=1)
+            )
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         return dists
 
@@ -125,7 +132,17 @@ class KNearestNeighbor:
         #       and two broadcast sums.                                         #
         #########################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
+        # print(f'{X.shape=}; {self.X_train.shape}')
+        # dists = np.sqrt(
+        #     np.sum(
+        #         (X[:,np.newaxis,:] - self.X_train)**2, axis=2
+        #     )
+        # )
+        dists = np.sqrt(
+          -2 * (X @ self.X_train.T) +
+          np.power(X, 2).sum(axis=1, keepdims=True) +
+          np.power(self.X_train, 2).sum(axis=1, keepdims=True).T
+        )
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         return dists
 
@@ -145,6 +162,7 @@ class KNearestNeighbor:
         num_test = dists.shape[0]
         y_pred = np.zeros(num_test)
         for i in range(num_test):
+            pass
             # A list of length k storing the labels of the k nearest neighbors to
             # the ith test point.
             #########################################################################
@@ -155,7 +173,7 @@ class KNearestNeighbor:
             # Hint: Look up the function numpy.argsort.                             #
             #########################################################################
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
+            closest_y = self.y_train[np.argsort(dists[i,:])[:k]]
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
             #########################################################################
             # TODO:                                                                 #
@@ -165,7 +183,8 @@ class KNearestNeighbor:
             # label.                                                                #
             #########################################################################
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
+            lbls, counts = np.unique(closest_y, return_counts=True)
+            y_pred[i] = lbls[np.argmax(counts)]
 
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
